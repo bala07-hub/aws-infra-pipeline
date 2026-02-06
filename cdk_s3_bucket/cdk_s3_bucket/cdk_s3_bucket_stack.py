@@ -1,7 +1,8 @@
 from aws_cdk import (
     Stack,
     RemovalPolicy,
-    aws_s3 as s3,  # Add the missing imports
+    Duration,                # Added for timing
+    aws_s3 as s3,
 )
 from constructs import Construct
 
@@ -10,12 +11,25 @@ class CdkS3BucketStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # Create an S3 bucket
         bucket = s3.Bucket(self, "demo-cdk-code-catalyst-bala",  
-            # Optional configurations
             bucket_name="testing-test-doc-bukall", 
-            versioned=True,  # Enable versioning
-            encryption=s3.BucketEncryption.S3_MANAGED,  # Enable encryption
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,  # Block public access
-            removal_policy=RemovalPolicy.DESTROY  # Optional: automatically delete bucket when stack is destroyed
+            versioned=True,
+            encryption=s3.BucketEncryption.S3_MANAGED,
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            enforce_ssl=True,                          # Security Best Practice
+            removal_policy=RemovalPolicy.DESTROY,
+            
+            # --- ADD THIS: Lifecycle Rule ---
+            lifecycle_rules=[
+                s3.LifecycleRule(
+                    enabled=True,
+                    expiration=Duration.days(30),      # Auto-delete after 30 days
+                    transitions=[
+                        s3.Transition(
+                            storage_class=s3.StorageClass.INFREQUENT_ACCESS,
+                            transition_after=Duration.days(10) # Move to cheaper tier after 10 days
+                        )
+                    ]
+                )
+            ]
         )

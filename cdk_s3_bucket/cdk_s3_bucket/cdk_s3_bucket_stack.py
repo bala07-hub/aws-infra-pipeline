@@ -28,6 +28,7 @@ class CdkS3BucketStack(Stack):
                         s3.Transition(
                             storage_class=s3.StorageClass.INFREQUENT_ACCESS,
                             transition_after=Duration.days(10) # Move to cheaper tier after 10 days
+                            # This is a rebase test.
                         )
                     ]
                 )
